@@ -5,7 +5,9 @@ import 'package:mitra_pix/features/auth/data/firebase_auth_repo.dart';
 import 'package:mitra_pix/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:mitra_pix/features/auth/presentation/cubits/auth_states.dart';
 import 'package:mitra_pix/features/auth/presentation/pages/auth_page.dart';
-import 'package:mitra_pix/features/posts/presentation/pages/home_page.dart';
+import 'package:mitra_pix/features/home/presentation/pages/home_page.dart';
+import 'package:mitra_pix/features/profile/data/firebase_profile_repo.dart';
+import 'package:mitra_pix/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:mitra_pix/themes/light_mode.dart';
 
 /* 
@@ -30,12 +32,25 @@ import 'package:mitra_pix/themes/light_mode.dart';
 class MyApp extends StatelessWidget {
   // auth repo
   final authRepo = FirebaseAuthRepo();
+
+  // profile repo
+  final profileRepo = FirebaseProfileRepo();
   MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => AuthCubit(authRepo: authRepo)..checkAuth(),
+    return MultiBlocProvider(
+      providers: [
+        // auth cubit
+
+        BlocProvider<AuthCubit>(
+            create: (context) => AuthCubit(authRepo: authRepo)..checkAuth()),
+
+        // profile cubit
+
+        BlocProvider(
+            create: (context) => ProfileCubit(profielRepo: profileRepo))
+      ],
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: lightMode,
