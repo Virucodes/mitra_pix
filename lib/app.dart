@@ -8,6 +8,7 @@ import 'package:mitra_pix/features/auth/presentation/pages/auth_page.dart';
 import 'package:mitra_pix/features/home/presentation/pages/home_page.dart';
 import 'package:mitra_pix/features/profile/data/firebase_profile_repo.dart';
 import 'package:mitra_pix/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:mitra_pix/features/storage/data/firebase_storage_repo.dart';
 import 'package:mitra_pix/themes/light_mode.dart';
 
 /* 
@@ -31,10 +32,13 @@ import 'package:mitra_pix/themes/light_mode.dart';
 
 class MyApp extends StatelessWidget {
   // auth repo
-  final authRepo = FirebaseAuthRepo();
+  final firebaseAuthRepo = FirebaseAuthRepo();
 
   // profile repo
-  final profileRepo = FirebaseProfileRepo();
+  final firebaseProfileRepo = FirebaseProfileRepo();
+
+  // storage repo
+  final firebaseStorageRepo = FirebaseStorageRepo();
   MyApp({super.key});
 
   @override
@@ -44,12 +48,12 @@ class MyApp extends StatelessWidget {
         // auth cubit
 
         BlocProvider<AuthCubit>(
-            create: (context) => AuthCubit(authRepo: authRepo)..checkAuth()),
+            create: (context) => AuthCubit(authRepo: firebaseAuthRepo)..checkAuth()),
 
         // profile cubit
 
         BlocProvider(
-            create: (context) => ProfileCubit(profielRepo: profileRepo))
+            create: (context) => ProfileCubit(profielRepo: firebaseProfileRepo, storageRepo: firebaseStorageRepo))
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

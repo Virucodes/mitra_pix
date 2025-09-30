@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mitra_pix/features/auth/domain/entities/app_user.dart';
@@ -51,7 +52,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const EditProfilePage())),
+                            builder: (context) => EditProfilePage(
+                                  profileUser: user,
+                                ))),
                     icon: const Icon(Icons.settings)),
               ],
             ),
@@ -72,27 +75,33 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
 
                 // profile pic
+                
+                CachedNetworkImage(
+                  imageUrl: user.profileImageUrl,
+                  // loading
+                  placeholder: (context, url) => CircularProgressIndicator(),
 
-                Container(
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary,
-                      borderRadius: BorderRadius.circular(12)),
-                  height: 120,
-                  width: 120,
-                  padding: const EdgeInsets.all(25),
-                  child: Center(
-                    child: Icon(
-                      Icons.person,
-                      size: 72,
-                      color: Theme.of(context).colorScheme.primary,
+                  // no image error
+                  errorWidget: (context, url, error) => Icon(
+                    Icons.person,
+                    size: 72,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+
+                  // loaded
+                  imageBuilder: (context, imageProvider) => Container(
+                    height: 150,
+                    width: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                      
                     ),
+                    
                   ),
                 ),
-
-                const SizedBox(
-                  height: 25,
-                ),
-
+                
+                const SizedBox(height: 25,),
                 // bio box
                 Padding(
                   padding: const EdgeInsets.only(left: 25),
