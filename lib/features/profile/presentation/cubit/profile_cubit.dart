@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mitra_pix/features/profile/domain/entities/profile_user.dart';
 import 'package:mitra_pix/features/profile/domain/repos/profile_repo.dart';
 import 'package:mitra_pix/features/profile/presentation/cubit/profile_states.dart';
 import 'package:mitra_pix/features/storage/domain/storage_repo.dart';
@@ -14,8 +15,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     required this.storageRepo,
   }) : super(ProfileInitial());
 
-  // fetch user profile using repo
-
+  // fetch user profile using repo -> useful for loading single profile-pages
   Future<void> fetchUserProfile(String uid) async {
     try {
       emit(ProfileLoading());
@@ -30,6 +30,12 @@ class ProfileCubit extends Cubit<ProfileState> {
     } catch (e) {
       emit(ProfileError(e.toString()));
     }
+  }
+
+  // return user profile given uid -> userful for loading many profiles for posts
+  Future<ProfileUser?> getUserProfile(String uid) async {
+    final user = await profielRepo.fetchUserProfile(uid);
+    return user;
   }
 
   // update bio and or profile picture
@@ -70,14 +76,18 @@ class ProfileCubit extends Cubit<ProfileState> {
         }
       }
 
-      if (imageDownloadUrl == null) {
+      // Only emit error if image was provided but upload failed
+      if ((imageWebBytes != null || imageMobilePath != null) &&
+          imageDownloadUrl == null) {
         emit(ProfileError("Failed to upload image"));
+        return;
       }
 
       // update new profile
 
-      final updatedProfile =
-          currentUser.copyWith(newBio: newBio ?? currentUser.bio, newProfileImageUrl: imageDownloadUrl ?? currentUser.profileImageUrl);
+      final updatedProfile = currentUser.copyWith(
+          newBio: newBio ?? currentUser.bio,
+          newProfileImageUrl: imageDownloadUrl ?? currentUser.profileImageUrl);
 
       // update in repo
       await profielRepo.updateProfile(updatedProfile);

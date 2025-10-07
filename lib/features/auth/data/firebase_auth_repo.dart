@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mitra_pix/features/auth/domain/entities/app_user.dart';
 import 'package:mitra_pix/features/auth/domain/repo/auth_repo.dart';
 
@@ -14,10 +15,18 @@ class FirebaseAuthRepo implements AuthRepo {
       UserCredential userCredential = await firebaseAuth
           .signInWithEmailAndPassword(email: email, password: password);
 
-      // create a user
+      // fetch user document from firestore
+      DocumentSnapshot userDoc = await firestore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .get();
 
-      AppUser user =
-          AppUser(uid: userCredential.user!.uid, email: email, name: '');
+      // create a user
+      AppUser user = AppUser(
+        uid: userCredential.user!.uid,
+        email: email,
+        name: userDoc['name'],
+      );
 
       //return app user
       return user;
@@ -38,7 +47,7 @@ class FirebaseAuthRepo implements AuthRepo {
 
       AppUser user =
           AppUser(uid: userCredential.user!.uid, email: email, name: name);
-      
+
       // save user data
       await firestore.collection('users').doc(user.uid).set({
         'uid': user.uid,
@@ -68,8 +77,17 @@ class FirebaseAuthRepo implements AuthRepo {
       return null;
     }
 
+    // fetch user document from firestore
+    DocumentSnapshot userDoc =
+        await firestore.collection('users').doc(firebaseUser.uid).get();
+
+    if (!userDoc.exists) {
+      return null;
+    }
     // user exists
     return AppUser(
-        uid: firebaseUser.uid, email: firebaseUser.email ?? '', name: '');
+        uid: firebaseUser.uid,
+        email: firebaseUser.email!,
+        name: userDoc['name']);
   }
 }
